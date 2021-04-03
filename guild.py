@@ -1,6 +1,7 @@
 from regions import REGIONS
 from replit import db
 import time, os, urllib.parse, requests
+from player import get_user_db_key
 
 class Guild:
 
@@ -11,8 +12,8 @@ class Guild:
 
   def register_guild_in_db(self):
     if (not self.guild_exists()):
-      guild_key = self.get_guild_db_key()
-      db[guild_key] = self.region
+      db[self.get_guild_db_key()] = self.region
+      db[self.get_guild_members_key()] = ""
       log_message = "Guild {0} registered!".format(self.name)
     else:
       log_message = "Guild {0} already registered!".format(self.name)
@@ -28,6 +29,9 @@ class Guild:
 
   def get_timestamp_key(self):
     return 'timestamp|{0}|{1}'.format(self.name, self.server)
+
+  def get_guild_members_key(self):
+    return 'guildmembers|{0}|{1}'.format(self.name, self.server)
 
   def get_guild_value(self):
     if (not self.guild_exists()):
@@ -64,3 +68,6 @@ class Guild:
     request_string = "https://www.fflogs.com:443/v1/reports/guild/{0}/{1}/{2}?api_key={3}".format(urllib.parse.quote(self.name), self.server, self.region, api_token)
     result = requests.get(request_string)
     return result
+
+  def add_player_to_guild(self, player):
+    db[self.get_guild_members_key()] = db[self.get_guild_members_key()] + '{0}|'.format(player.username)
